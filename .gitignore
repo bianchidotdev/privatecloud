@@ -1,0 +1,5 @@
+etc/traefik/acme.json
+usersfile
+db.env
+.env
+etc/plex-config

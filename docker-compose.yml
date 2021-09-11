@@ -1,0 +1,79 @@
+version: '3'
+
+services:
+  traefik:
+   image: traefik:2.2
+   restart: always
+   ports:
+   - '80:80'
+   - '443:443'
+   - "8080:8080"
+   command:
+   - "--api=true"
+   volumes:
+   - ./etc/traefik:/etc/traefik
+   - ./usersfile:/etc/usersfile
+   - /var/run/docker.sock:/var/run/docker.sock:ro
+   network_mode: host
+   labels:
+   - "traefik.enable=true"
+   - "traefik.http.routers.traefik.rule=Host(`traefik.${BASE_DOMAIN}`)"
+   - "traefik.http.routers.traefik.entrypoints=websecure"
+   - "traefik.http.routers.traefik.tls.certresolver=lets-encrypt"
+   - "traefik.http.routers.traefik.middlewares=dash-auth"
+   - "traefik.http.middlewares.dash-auth.basicauth.usersfile=/etc/usersfile"
+   - "traefik.http.services.api@internal.loadbalancer.server.port=8080"
+
+  db:
+    image: postgres:alpine
+    restart: always
+    volumes:
+    - /home/ubuntu/data/nextcloud-db:/var/lib/postgresql/data
+    env_file:
+    - db.env
+
+  nextcloud:
+    image: nextcloud:apache
+    restart: always
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.nextcloud.rule=Host(`cloud.${BASE_DOMAIN}`)"
+    - "traefik.http.routers.nextcloud.entrypoints=websecure"
+    - "traefik.http.routers.nextcloud.tls.certresolver=lets-encrypt"
+    ports:
+      - 8888:80
+    volumes:
+      - /home/ubuntu/data/nextcloud-data:/var/www/html
+    environment:
+      - POSTGRES_HOST=db
+    env_file:
+      - db.env
+    depends_on:
+      - db
+
+  cron:
+    image: nextcloud:apache
+    restart: always
+    volumes:
+      - /home/ubuntu/data/nextcloud-data:/var/www/html
+    entrypoint: /cron.sh
+    depends_on:
+      - db
+  
+  plex:
+    image: linuxserver/plex
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+        #- PLEX_CLAIM= #optional
+    volumes:
+    - /home/ubuntu/data/plex/tv:/tv
+    - /home/ubuntu/data/plex/movies:/movies
+    - ./etc/plex-config:/config
+    ports:
+    - 32400:32400
+    network_mode: host
+    depends_on:
+    - nextcloud
