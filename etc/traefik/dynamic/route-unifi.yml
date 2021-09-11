@@ -1,7 +1,7 @@
 tcp:
   routers:
     route-to-unifi:
-      rule: "HostSNI(`unifi.bonkybot.com`)"
+      rule: "HostSNI(`unifi.{{env "BASE_DOMAIN"}}`)"
       service: unifi
       priority: 1000
       tls:

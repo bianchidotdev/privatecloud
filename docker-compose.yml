@@ -10,6 +10,7 @@ services:
    - "8080:8080"
    command:
    - "--api=true"
+   env_file: .env
    volumes:
    - ./etc/traefik:/etc/traefik
    - ./usersfile:/etc/usersfile
