@@ -3,7 +3,6 @@ tcp:
     route-to-router:
       rule: "HostSNI(`{{env "ROUTER_SUBDOMAIN"}}{{env "BASE_DOMAIN"}}`)"
       service: router
-      priority: 1000
       tls:
         passthrough: true
 
