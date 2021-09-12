@@ -15,7 +15,6 @@ services:
    - ./etc/traefik:/etc/traefik
    - ./usersfile:/etc/usersfile
    - /var/run/docker.sock:/var/run/docker.sock:ro
-   network_mode: host
    labels:
    - "traefik.enable=true"
    - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_SUBDOMAIN}${BASE_DOMAIN}`)"
@@ -29,7 +28,7 @@ services:
     image: postgres:alpine
     restart: always
     volumes:
-    - /home/ubuntu/data/nextcloud-db:/var/lib/postgresql/data
+    - ${DATA_DIR}/nextcloud-db:/var/lib/postgresql/data
     env_file:
     - db.env
 
@@ -44,7 +43,7 @@ services:
     ports:
       - 8888:80
     volumes:
-      - /home/ubuntu/data/nextcloud-data:/var/www/html
+      - ${DATA_DIR}/nextcloud-data:/var/www/html
     environment:
       - POSTGRES_HOST=db
     env_file:
@@ -56,7 +55,7 @@ services:
     image: nextcloud:apache
     restart: always
     volumes:
-      - /home/ubuntu/data/nextcloud-data:/var/www/html
+      - ${DATA_DIR}/nextcloud-data:/var/www/html
     entrypoint: /cron.sh
     depends_on:
       - db
@@ -70,11 +69,10 @@ services:
       - VERSION=docker
         #- PLEX_CLAIM= #optional
     volumes:
-    - /home/ubuntu/data/plex/tv:/tv
-    - /home/ubuntu/data/plex/movies:/movies
+    - ${DATA_DIR}/plex/tv:/tv
+    - ${DATA_DIR}/plex/movies:/movies
     - ./etc/plex-config:/config
     ports:
     - 32400:32400
-    network_mode: host
     depends_on:
     - nextcloud
