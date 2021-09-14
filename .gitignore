@@ -1,5 +1,6 @@
 etc/traefik/acme.json
 usersfile
 db.env
+kopia.env
 .env
 etc/plex-config
