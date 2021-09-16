@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+set -e
 
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 PROJECT_ROOT=$(dirname "${SCRIPT_DIR}"/..)
 
 for file in "db.env" ".env"; do
