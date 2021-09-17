@@ -2,27 +2,30 @@ version: '3'
 
 services:
   traefik:
-   image: traefik:2.5
-   restart: always
-   ports:
-   - '80:80'
-   - '443:443'
-   - "8080:8080"
-   command:
-   - "--api=true"
-   env_file: .env
-   volumes:
-   - ./etc/traefik:/etc/traefik
-   - ./usersfile:/etc/usersfile
-   - /var/run/docker.sock:/var/run/docker.sock:ro
-   labels:
-   - "traefik.enable=true"
-   - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_SUBDOMAIN}${BASE_DOMAIN}`)"
-   - "traefik.http.routers.traefik.entrypoints=websecure"
-   - "traefik.http.routers.traefik.tls.certresolver=lets-encrypt"
-   - "traefik.http.routers.traefik.middlewares=dash-auth"
-   - "traefik.http.middlewares.dash-auth.basicauth.usersfile=/etc/usersfile"
-   - "traefik.http.services.api@internal.loadbalancer.server.port=8080"
+    image: traefik:2.5
+    restart: always
+    ports:
+    - '80:80'
+    - '443:443'
+    - "8080:8080"
+    command:
+    - "--api=true"
+    env_file: .env
+    volumes:
+    - ./etc/traefik:/etc/traefik
+    - ./usersfile:/etc/usersfile
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_SUBDOMAIN}${BASE_DOMAIN}`)"
+    - "traefik.http.routers.traefik.entrypoints=websecure"
+    - "traefik.http.routers.traefik.tls.certresolver=lets-encrypt"
+    - "traefik.http.routers.traefik.middlewares=dash-auth"
+    - "traefik.http.middlewares.dash-auth.basicauth.usersfile=/etc/usersfile"
+    - "traefik.http.services.api@internal.loadbalancer.server.port=8080"
+    networks:
+    - internal
+    - web
 
   db:
     image: postgres:alpine
@@ -31,6 +34,8 @@ services:
     - ${DATA_DIR}/nextcloud-db:/var/lib/postgresql/data
     env_file:
     - db.env
+    networks:
+    - internal
 
   nextcloud:
     image: nextcloud:apache
@@ -48,6 +53,8 @@ services:
       - POSTGRES_HOST=db
     env_file:
       - db.env
+    networks:
+      - internal
     depends_on:
       - db
 
@@ -57,9 +64,11 @@ services:
     volumes:
       - ${DATA_DIR}/nextcloud-data:/var/www/html
     entrypoint: /cron.sh
+    networks:
+    - internal
     depends_on:
       - db
-  
+
   plex:
     image: linuxserver/plex
     restart: always
@@ -74,5 +83,14 @@ services:
     - ./etc/plex-config:/config
     ports:
     - 32400:32400
+    networks:
+    - web
     depends_on:
     - nextcloud
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false
+
