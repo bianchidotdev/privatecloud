@@ -4,3 +4,6 @@ db.env
 kopia.env
 .env
 etc/plex-config
+
+*.log
+.vagrant/

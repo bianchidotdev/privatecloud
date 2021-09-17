@@ -29,7 +29,6 @@ Start the docker compose suite:
 docker-compose up    # or docker compose
 ```
 
-
 ## TODO
 
 1. Variablize data directory
