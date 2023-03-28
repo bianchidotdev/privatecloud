@@ -2,8 +2,8 @@
 
 set -e
 
-SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
-PROJECT_ROOT=$(dirname "${SCRIPT_DIR}"/..)
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PROJECT_ROOT="${SCRIPT_DIR}/.."
 
 # Source the domains set 
 set -o allexport
